@@ -79,18 +79,13 @@
   }
   .nav-wrapper { margin: 8px 0; }
   
-  /* 原本的連結樣式 */
   a.nav-link {
     color: #8b0000; text-decoration: none; font-weight: bold; display: inline-block;
     padding: 8px 15px; border: 1.5px solid #8b0000; border-radius: 6px; transition: 0.3s;
     background-color: #fff;
   }
   a.nav-link:hover { background: #8b0000; color: #fff; transform: translateY(-2px); }
-  
-  /* 已訪問（反色調）的連結樣式 */
-  a.nav-link.visited-link {
-    background-color: #e0e0e0; color: #777; border-color: #aaa;
-  }
+  a.nav-link.visited-link { background-color: #e0e0e0; color: #777; border-color: #aaa; }
   a.nav-link.visited-link:hover { background-color: #ccc; color: #555; }
   
   .choice-btn {
@@ -122,16 +117,22 @@
   #leaderboard-modal, #quiz-modal {
     display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
     background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-    z-index: 200; width: 90%; max-width: 450px; text-align: center;
+    z-index: 200; width: 90%; max-width: 500px; text-align: center;
   }
   #leaderboard-modal h2, #quiz-modal h2 { color: #8b0000; border-bottom: 2px solid #d4af37; padding-bottom: 10px; margin-top:0;}
   #leaderboard-list { list-style: none; padding: 0; margin: 20px 0; font-size: 1.2em; text-align: left; max-height: 300px; overflow-y: auto;}
   #leaderboard-list li { padding: 12px 10px; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; align-items: center;}
   
   /* --- 測驗專用樣式 --- */
-  #quiz-question { font-size: 1.25em; line-height: 1.6; text-align: left; color: #333; font-weight: bold; margin: 20px 0; }
-  #quiz-input { width: 90%; margin-bottom: 10px; font-weight: bold; color: #8b0000; }
-  #quiz-feedback { font-weight: bold; height: 3em; margin: 10px 0; font-size: 1.1em; text-align: left; }
+  #quiz-question { font-size: 1.2em; line-height: 1.6; text-align: left; color: #333; font-weight: bold; margin: 15px 0; }
+  .quiz-option-btn {
+    display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 10px;
+    font-size: 1.1em; background: #f9f9f9; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: bold;
+  }
+  .quiz-option-btn:hover:not(:disabled) { background: #eee; border-color: #8b0000; }
+  .quiz-option-btn.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+  .quiz-option-btn.wrong { background: #ffebee; border-color: #f44336; color: #c62828; }
+  #quiz-feedback { font-weight: bold; min-height: 3em; margin: 10px 0; font-size: 1.1em; text-align: left; }
   
   img.scene-img { max-width: 80%; border-radius: 8px; margin: 15px auto; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 </style>
@@ -161,6 +162,7 @@
 <div id="game-container"></div>
 
 <div class="overlay" id="overlay" onclick="closeModals()"></div>
+
 <div id="leaderboard-modal">
   <h2>🏆 各主帥排行榜 🏆</h2>
   <ul id="leaderboard-list"></ul>
@@ -169,11 +171,16 @@
 
 <div id="quiz-modal">
   <h2 id="quiz-title">【綜合演練】</h2>
-  <p id="quiz-progress" style="color:#666; font-weight:bold;"></p>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <span id="quiz-progress" style="color:#666; font-weight:bold;"></span>
+    <button class="btn" style="width:auto; padding:5px 15px; margin:0; background-color:#888;" onclick="cancelQuiz()">🚪 離開測驗</button>
+  </div>
   <p id="quiz-question"></p>
-  <input type="text" id="quiz-input" placeholder="請輸入四字成語" onkeypress="if(event.key === 'Enter') checkQuizAnswer()">
+  
+  <div id="quiz-options-container"></div>
+  
   <div id="quiz-feedback"></div>
-  <button class="btn" id="quiz-btn" style="width:100%; margin:0;" onclick="checkQuizAnswer()">送出答案</button>
+  <button class="btn" id="quiz-next-btn" style="width:100%; margin:0; display:none;" onclick="nextQuizQuestion()">下一題</button>
 </div>
 
 <audio id="bgm" src="https://otologic.jp/sounds/bgm/pre/Formidable%20Enemy.mp3" loop></audio>
@@ -252,9 +259,6 @@
 <img src="file:///Users/phongnghi/Downloads/%E5%80%9F%E5%88%80%E6%AE%BA%E4%BA%BA.jpg" width="80%">
 </div>
 袁老師神情一肅：「『借刀殺人』，是指自己不出面，而是利用第三方的力量去消滅敵人，以保存己方的實力。」
-【📝 生詞學習】
-* 借 (jiè)：利用、假託。
-* 實力 (shí lì)：真實的力量（通常指軍事或經濟）。
 【💬 現代情境對話】
 「商場如戰場，有時惡意的競爭對手會『借刀殺人』，利用網路上的假新聞與輿論來打擊對手公司的聲譽。」
 袁老師緊盯著沙盤：「如果我方散佈假情報，讓敵國的君主懷疑並處死了他手下最厲害的將軍，這是哪一種計謀？」
@@ -262,7 +266,7 @@
 (text-color:#d4af37)[袁老師滿意地說：「完全正確！敵國的君主，就是我們借來消滅敵將的那把『刀』。」]
 ]
 (link: "【✏️ 點擊作答：瞞天過海】")[
-(text-color:#8b0000)[袁老師搖搖頭：「觀念混淆了喔！瞞天過海重在『隱蔽自己的行動』，但這裡的重點是利用『他人之手（第三方）』除掉威脅，這就是借刀殺人。」]
+(text-color:#8b0000)[袁老師搖搖頭：「觀念混淆了喔！瞞天過海重在『隱蔽行動』，這裡的重點是利用『他人之手（第三方）』除掉威脅，這是借刀殺人。」]
 ]
 [[返回〖勝戰計〗竹簡->勝戰計]]
 [[返回主帥帳->主帥帳]]
@@ -296,7 +300,7 @@
 (text-color:#d4af37)[袁老師讚賞地點點頭：「沒錯！不去正面硬碰硬，而是攻擊敵人的後方必救之處，這正是圍魏救趙的智慧。」]
 ]
 (link: "【✏️ 點擊作答：不符合】")[
-(text-color:#8b0000)[袁老師提醒道：「再思考一下其底層邏輯。對手攻擊我們高階市場（攻趙），我們不在此防守，反而去攻擊他的基本盤（圍魏），迫使他回防，這完全符合圍魏救趙的應用。」]
+(text-color:#8b0000)[袁老師提醒道：「再思考一下底層邏輯。對手攻擊我們高階市場，我們反而去攻擊他的基本盤，迫使他回防，這完全符合圍魏救趙。」]
 ]
 [[返回〖勝戰計〗竹簡->勝戰計]]
 [[返回主帥帳->主帥帳]]
@@ -356,7 +360,7 @@
 (text-color:#d4af37)[袁老師讚許道：「沒錯！正面的『決戰假象』就是掩人耳目的棧道，海上的奇兵才是真正的陳倉行動。」]
 ]
 (link: "【✏️ 點擊作答：不是】")[
-(text-color:#8b0000)[袁老師引導道：「兵法中，只要符合『利用極度明顯的假象』來掩蓋『真正的秘密行動』，這個計謀就成立了，所以答案是『算』喔。」]
+(text-color:#8b0000)[袁老師引導道：「兵法中，只要符合『利用極度明顯的假象』來掩蓋『真正的秘密行動』，這個計謀就成立了，所以答案是算喔。」]
 ]
 [[返回敵戰計->敵戰計]]
 [[返回主帥帳->主帥帳]]
@@ -374,7 +378,7 @@
 (text-color:#d4af37)[袁老師點頭：「是的。雖然犧牲很痛苦，但為了整體的生存，這是有時必須做的決定。」]
 ]
 (link: "【✏️ 點擊作答：不符合】")[
-(text-color:#8b0000)[袁老師感慨道：「請注意『代』字。小哨所代替主力部隊承受攻擊而犧牲（僵），保全了主力（大局），正是這計謀的殘酷與智慧之處。」]
+(text-color:#8b0000)[袁老師感慨道：「請注意『代』字。小哨所代替主力部隊承受攻擊而犧牲，保全了主力（大局），正是這計謀的殘酷與智慧之處。」]
 ]
 [[返回敵戰計->敵戰計]]
 [[返回主帥帳->主帥帳]]
@@ -405,7 +409,7 @@
 (text-color:#d4af37)[袁老師點頭：「正是如此！利用大量煙霧製造『兵力雄厚』的假象，就是無中生有。」]
 ]
 (link: "【✏️ 點擊作答：不算！】")[
-(text-color:#8b0000)[袁老師搖頭引導：「炊煙在戰場上代表『有人』。明明沒有大軍卻製造出大軍的炊煙，這就是創造不存在的事實來欺騙敵人，所以這絕對算無中生有。」]
+(text-color:#8b0000)[袁老師搖頭引導：「炊煙在戰場上代表『有人』。明明沒有大軍卻製造出大軍的炊煙，這就是創造不存在的事實來欺騙敵人。」]
 ]
 [[返回敵戰計->敵戰計]]
 [[返回主帥帳->主帥帳]]
@@ -438,7 +442,7 @@
 「那個人表面上對誰都客客氣氣，背地裡卻經常向主管打小報告，真是『笑裡藏刀』，防不勝防。」
 袁老師問：「如果敵國突然派使者送來大量的財寶並請求聯姻，我們該立刻放下武裝嗎？」
 (link: "【✏️ 點擊作答：該，這是和平的象徵】")[
-(text-color:#8b0000)[袁老師嚴肅地說：「身為指揮官不可如此天真！無事獻殷勤，非奸即盜。這極可能是『笑裡』的偽裝，為的是掩飾背後的『刀』。」]
+(text-color:#8b0000)[袁老師嚴肅地說：「身為指揮官不可如此天真！這極可能是『笑裡』的偽裝，為的是掩飾背後的『刀』。」]
 ]
 (link: "【✏️ 點擊作答：不該，需防備其真實意圖】")[
 (text-color:#d4af37)[袁老師讚賞道：「不錯！保持理智的懷疑，不被表面的『笑』所迷惑，是防禦此計的基本素養。」]
@@ -867,7 +871,7 @@
 </div>
 袁老師輕鬆地拿起一旁的羽扇：「『順手牽羊』，是指趁著敵人出現微小的漏洞或疏忽時，順便抓住機會獲取好處。這計謀強調整個過程不需要大費周章，而是『隨手而為』。」
 【💬 現代情境對話】
-「他本來只是去書店買文具，看到特價的經典華語辭典，就『順手牽羊』也買了一本回家。」（註：此處指順便買，非偷竊）
+「他本來只是去書店買文具，看到特價的經典華語辭典，就『順手牽羊』也買了一本回家。」
 袁老師笑問：「我軍在行軍路上發現敵方散落的軍糧，雖然不是主要目標，但順便搬走，這算順手牽羊嗎？」
 (link: "【✏️ 點擊作答：算】")[
 (text-color:#d4af37)[袁老師笑道：「答對了！善於利用微小的機會積累優勢，不費吹灰之力，也是名將的特質。」]
@@ -881,7 +885,8 @@
 
 <script>
     const IMAGE_LINKS = {
-        "主帥帳": "https://i.ibb.co/7c8bk7y/image.png",
+        // 主頁面更換為指定網址
+        "主帥帳": "https://language.chinadaily.com.cn/images/attachement/jpg/site1/20160121/00221910993f180abb7222.jpg",
         "勝戰計": "https://i.ibb.co/G43Jw7wq/image.png",
         "敵戰計": "https://i.ibb.co/yc09Q7DG/image.png",
         "攻戰計": "https://i.ibb.co/fVV0HCm4/image.png",
@@ -928,58 +933,123 @@
     };
 
     // ==========================================
-    // 🌟 C1-C2 高階綜合演練題庫 (自動生成) 🌟
+    // 🌟 C1-C2 高階綜合選擇題庫 (各套 15 題，抽 5 題)
     // ==========================================
     const QUIZ_DATA = {
         "勝戰計": [
-            { q: "該跨國詐騙集團常設立海外空殼公司來________，讓執法單位難以察覺其非法的資金流向。", a: "瞞天過海", exp: "瞞天過海：把秘密隱藏在公開的事物中。" },
-            { q: "面對惡意併購，公司高層決定________，直接收購對方的上游供應商，迫使對方放棄行動。", a: "圍魏救趙", exp: "圍魏救趙：攻擊敵人後方必救之處以解困境。" },
-            { q: "在這場政治角力中，他巧妙地________，利用媒體的輿論力量逼迫政敵引咎辭職。", a: "借刀殺人", exp: "借刀殺人：利用第三方的力量去消滅敵人。" },
-            { q: "投資理財應具備長遠眼光，與其頻繁交易耗費心神，不如選定優質標的後________，靜待資產增值。", a: "以逸待勞", exp: "以逸待勞：養精蓄銳，等待疲憊的敵人來犯。" },
-            { q: "駭客組織刻意在該銀行進行系統升級、防護最脆弱之際________，竊取了大量客戶資料。", a: "趁火打劫", exp: "趁火打劫：乘別人處於危難、混亂之際撈取好處。" },
-            { q: "歹徒在市區南邊故意製造連環車禍以________，實則趁警方調度警力時，搶劫了北邊的珠寶行。", a: "聲東擊西", exp: "聲東擊西：表面上攻擊東邊，實際上卻襲擊西邊。" }
+            { q: "該跨國集團常設立海外空殼公司來_______，讓執法單位難以察覺其非法的資金流向。", options: ["趁火打劫", "圍魏救趙", "瞞天過海", "以逸待勞"], a: 2, exp: "瞞天過海：把秘密隱藏在公開的事物中。" },
+            { q: "面對惡意併購，公司高層決定_______，直接收購對方的上游供應商，迫使對方放棄行動。", options: ["借刀殺人", "聲東擊西", "趁火打劫", "圍魏救趙"], a: 3, exp: "圍魏救趙：攻擊敵人後方必救之處以解困境。" },
+            { q: "在這場政治角力中，他巧妙地_______，利用媒體的輿論力量逼迫政敵引咎辭職。", options: ["借刀殺人", "瞞天過海", "以逸待勞", "聲東擊西"], a: 0, exp: "借刀殺人：利用第三方的力量去消滅敵人。" },
+            { q: "投資理財應具備長遠眼光，與其頻繁交易耗費心神，不如選定優質標的後_______，靜待資產增值。", options: ["趁火打劫", "以逸待勞", "圍魏救趙", "借刀殺人"], a: 1, exp: "以逸待勞：養精蓄銳，等待疲憊的敵人來犯。" },
+            { q: "駭客組織刻意在該銀行進行系統升級、防護最脆弱之際_______，竊取了大量客戶資料。", options: ["瞞天過海", "聲東擊西", "趁火打劫", "以逸待勞"], a: 2, exp: "趁火打劫：乘別人處於危難、混亂之際撈取好處。" },
+            { q: "歹徒在市區南邊故意製造連環車禍以_______，實則趁警方調度警力時，搶劫了北邊的珠寶行。", options: ["圍魏救趙", "聲東擊西", "借刀殺人", "瞞天過海"], a: 1, exp: "聲東擊西：表面上攻擊東邊，實際上卻襲擊西邊。" },
+            { q: "競爭對手在展覽會上大肆宣揚即將推出劃時代新產品，其實只是_______，真正的目的是掩蓋財務危機。", options: ["以逸待勞", "瞞天過海", "趁火打劫", "借刀殺人"], a: 1, exp: "瞞天過海：利用公開的大動作掩蓋真實目的。" },
+            { q: "當敵軍將重兵部署在正面防線時，我軍卻派出艦隊直搗其首都，這招_______成功逼退了敵軍。", options: ["借刀殺人", "圍魏救趙", "趁火打劫", "聲東擊西"], a: 1, exp: "圍魏救趙：攻擊對方的要害來解除我方壓力。" },
+            { q: "他利用主管對某位員工的偏見，故意製造誤會，成功_______排除了自己的晉升障礙。", options: ["借刀殺人", "以逸待勞", "瞞天過海", "聲東擊西"], a: 0, exp: "借刀殺人：借主管的權力來打壓對手。" },
+            { q: "與其和網軍在論壇上唇槍舌戰，不如保留證據_______，等他們露出破綻再一舉提告。", options: ["以逸待勞", "圍魏救趙", "趁火打劫", "聲東擊西"], a: 0, exp: "以逸待勞：按兵不動，等對方消耗精力出錯。" },
+            { q: "敵國因天災導致糧食歉收、國內動盪，我國決定_______，大舉發兵跨越邊境。", options: ["借刀殺人", "瞞天過海", "以逸待勞", "趁火打劫"], a: 3, exp: "趁火打劫：利用對方國內的危難發動攻擊。" },
+            { q: "談判中，我方代表故意對某項次要條款表現出極度堅持，_______，最終成功讓對方在核心價格上讓步。", options: ["聲東擊西", "借刀殺人", "圍魏救趙", "以逸待勞"], a: 0, exp: "聲東擊西：轉移對方注意力，掩護真正的談判目標。" },
+            { q: "他表面上每天正常打卡上下班，卻_______地將公司的客戶名單一點一滴複製到私人硬碟中。", options: ["以逸待勞", "聲東擊西", "趁火打劫", "瞞天過海"], a: 3, exp: "瞞天過海：在日常作息中隱蔽不法行為。" },
+            { q: "這家企業在對手面臨公關危機、股價大跌時_______，提出極低價的惡意收購要約。", options: ["借刀殺人", "趁火打劫", "圍魏救趙", "聲東擊西"], a: 1, exp: "趁火打劫：在對方有難時趁機剝削。" },
+            { q: "將軍下令在東門點燃大量火把，主力軍卻_______，從毫無防備的西門攻入城內。", options: ["以逸待勞", "瞞天過海", "聲東擊西", "借刀殺人"], a: 2, exp: "聲東擊西：製造東邊的聲勢，攻擊西邊。" }
         ],
         "敵戰計": [
-            { q: "該小報為了衝高點閱率，經常________，捏造名流政客的不實緋聞。", a: "無中生有", exp: "無中生有：利用假象迷惑敵人，創造不存在的事實。" },
-            { q: "開發團隊表面上宣布暫停該專案，私底下卻________，秘密將核心技術轉移到新的子公司。", a: "暗渡陳倉", exp: "暗渡陳倉：用明顯的舉動掩護真正的秘密行動。" },
-            { q: "面對兩大強權的貿易戰，許多新興國家選擇________，試圖在雙方兩敗俱傷時拓展自身的市場份額。", a: "隔岸觀火", exp: "隔岸觀火：當敵方內部發生矛盾時不急於介入，坐收漁翁之利。" },
-            { q: "職場上最難防的就是那種________的同事，表面上對你噓寒問暖，背後卻經常向上司打你的小報告。", a: "笑裡藏刀", exp: "笑裡藏刀：表面友善，暗中策劃攻擊。" },
-            { q: "為了保全集團的整體利益與聲譽，董事會決定________，讓那家爆出醜聞的子公司宣布破產並承擔法律責任。", a: "李代桃僵", exp: "李代桃僵：為了保全大局，犧牲局部或次要部分。" },
-            { q: "駭客在入侵伺服器植入勒索軟體時，還________地竊取了未經加密的研發機密檔案。", a: "順手牽羊", exp: "順手牽羊：趁著敵人疏忽時，順便抓住機會獲取好處。" }
+            { q: "該小報為了衝高點閱率，經常_______，捏造名流政客的不實緋聞。", options: ["暗渡陳倉", "無中生有", "笑裡藏刀", "隔岸觀火"], a: 1, exp: "無中生有：利用假象迷惑敵人，創造不存在的事實。" },
+            { q: "開發團隊表面上宣布暫停該專案，私底下卻_______，秘密將核心技術轉移到新的子公司。", options: ["暗渡陳倉", "順手牽羊", "李代桃僵", "無中生有"], a: 0, exp: "暗渡陳倉：用明顯的舉動掩護真正的秘密行動。" },
+            { q: "面對兩大強權的貿易戰，許多新興國家選擇_______，試圖在雙方兩敗俱傷時拓展自身的市場份額。", options: ["笑裡藏刀", "暗渡陳倉", "隔岸觀火", "李代桃僵"], a: 2, exp: "隔岸觀火：敵方發生矛盾時不急於介入，坐收漁翁之利。" },
+            { q: "職場上最難防的就是那種_______的同事，表面上對你噓寒問暖，背後卻經常向上司打你的小報告。", options: ["無中生有", "順手牽羊", "笑裡藏刀", "隔岸觀火"], a: 2, exp: "笑裡藏刀：表面友善，暗中策劃攻擊。" },
+            { q: "為了保全集團的整體利益與聲譽，董事會決定_______，讓那家爆出醜聞的子公司宣布破產並承擔法律責任。", options: ["李代桃僵", "暗渡陳倉", "無中生有", "順手牽羊"], a: 0, exp: "李代桃僵：為了保全大局，犧牲局部或次要部分。" },
+            { q: "駭客在入侵伺服器植入勒索軟體時，還_______地竊取了未經加密的研發機密檔案。", options: ["隔岸觀火", "笑裡藏刀", "順手牽羊", "李代桃僵"], a: 2, exp: "順手牽羊：趁著敵人疏忽時，順便抓住機會獲取好處。" },
+            { q: "明明沒有任何證據，他卻能在會議上_______地指控競爭對手抄襲，導致會議陷入混亂。", options: ["無中生有", "暗渡陳倉", "隔岸觀火", "笑裡藏刀"], a: 0, exp: "無中生有：捏造不存在的指控。" },
+            { q: "敵軍在江邊大張旗鼓地建造浮橋，主力卻早已_______，從上游淺灘處悄悄渡江。", options: ["順手牽羊", "李代桃僵", "暗渡陳倉", "笑裡藏刀"], a: 2, exp: "暗渡陳倉：正面造橋是掩護，上游渡江是真實行動。" },
+            { q: "看著兩位經理為了爭奪預算而吵得不可開交，總監只是_______，藉此評估兩人的底線。", options: ["無中生有", "隔岸觀火", "順手牽羊", "李代桃僵"], a: 1, exp: "隔岸觀火：冷眼旁觀內部鬥爭。" },
+            { q: "他送上厚禮並主動提出和解，實則是_______，藉機麻痺我方的防備心。", options: ["笑裡藏刀", "暗渡陳倉", "隔岸觀火", "無中生有"], a: 0, exp: "笑裡藏刀：以和解與厚禮掩飾惡意。" },
+            { q: "這場車禍的肇事者找來一名無業遊民頂罪，企圖_______以逃避法律制裁。", options: ["李代桃僵", "順手牽羊", "暗渡陳倉", "笑裡藏刀"], a: 0, exp: "李代桃僵：找人頂替承擔責任。" },
+            { q: "在撤退途中，我軍發現敵方遺落的幾車糧草，便_______帶回營地補充軍需。", options: ["無中生有", "隔岸觀火", "笑裡藏刀", "順手牽羊"], a: 3, exp: "順手牽羊：順便帶走敵人的物資。" },
+            { q: "政客在選前承諾的眾多建設，選後被證實全都是_______，根本沒有編列任何預算。", options: ["無中生有", "暗渡陳倉", "李代桃僵", "隔岸觀火"], a: 0, exp: "無中生有：開出不存在的空頭支票。" },
+            { q: "表面上雙方公司正在進行常規的技術交流，實則對方已_______，暗中挖角了我們的核心工程師。", options: ["順手牽羊", "笑裡藏刀", "暗渡陳倉", "李代桃僵"], a: 2, exp: "暗渡陳倉：以技術交流為掩護進行挖角。" },
+            { q: "與其介入那兩個幫派的火拚，警方決定_______，等他們兩敗俱傷後再一網打盡。", options: ["笑裡藏刀", "無中生有", "李代桃僵", "隔岸觀火"], a: 3, exp: "隔岸觀火：等待雙方消耗實力。" }
         ],
         "攻戰計": [
-            { q: "警方決定先凍結嫌犯的部分海外帳戶來________，藉此觀察其同夥的後續反應與資金流向。", a: "打草驚蛇", exp: "打草驚蛇：主動製造動靜來試探敵人的虛實。" },
-            { q: "該財團收購了一家擁有百年歷史但已停業的老字號糕餅店，企圖________，利用其品牌光環推出新產品。", a: "借屍還魂", exp: "借屍還魂：利用失去作用的舊事物作為號召以達目的。" },
-            { q: "為了順利竊取博物館的鎮館之寶，怪盜先在另一側的展廳引發火災警報，成功________，引開了所有保安人員。", a: "調虎離山", exp: "調虎離山：誘使敵人離開原本有利的據點以便擊破。" },
-            { q: "談判專家在僵持不下時，故意做出讓步並表示準備終止協商，這種________的策略反而讓歹徒主動降低了要求。", a: "欲擒故縱", exp: "欲擒故縱：故意先放開敵人，使其鬆懈後再將其一網打盡。" },
-            { q: "我先提出這個粗淺的企劃草案，希望能________，激發各位同仁提出更具創意的行銷方案。", a: "拋磚引玉", exp: "拋磚引玉：拋出微小的利益或粗淺的意見，引出巨大的勝利或更好的見解。" },
-            { q: "處理這起複雜的勞資糾紛，我們必須________，直接與工會的最高代表進行實質協商，而非與基層員工周旋。", a: "擒賊擒王", exp: "擒賊擒王：解決問題必須抓住主要矛盾或打擊核心樞紐。" }
+            { q: "警方決定先凍結嫌犯的部分海外帳戶來_______，藉此觀察其同夥的後續反應與資金流向。", options: ["借屍還魂", "打草驚蛇", "調虎離山", "擒賊擒王"], a: 1, exp: "打草驚蛇：主動製造動靜來試探敵人的虛實。" },
+            { q: "該財團收購了一家擁有百年歷史但已停業的老字號糕餅店，企圖_______，利用其品牌光環推出新產品。", options: ["拋磚引玉", "欲擒故縱", "借屍還魂", "打草驚蛇"], a: 2, exp: "借屍還魂：利用失去作用的舊事物作為號召以達目的。" },
+            { q: "為了順利竊取博物館的鎮館之寶，怪盜先在另一側的展廳引發火災警報，成功_______，引開了所有保安人員。", options: ["擒賊擒王", "調虎離山", "拋磚引玉", "借屍還魂"], a: 1, exp: "調虎離山：誘使敵人離開原本有利的據點以便擊破。" },
+            { q: "談判專家在僵持不下時，故意做出讓步並表示準備終止協商，這種_______的策略反而讓歹徒主動降低了要求。", options: ["欲擒故縱", "打草驚蛇", "擒賊擒王", "拋磚引玉"], a: 0, exp: "欲擒故縱：故意先放開敵人，使其鬆懈後再將其一網打盡。" },
+            { q: "我先提出這個粗淺的企劃草案，希望能_______，激發各位同仁提出更具創意的行銷方案。", options: ["拋磚引玉", "借屍還魂", "調虎離山", "欲擒故縱"], a: 0, exp: "拋磚引玉：拋出微小的利益或粗淺的意見，引出更好的見解。" },
+            { q: "處理這起複雜的勞資糾紛，我們必須_______，直接與工會的最高代表進行實質協商，而非與基層員工周旋。", options: ["擒賊擒王", "打草驚蛇", "借屍還魂", "調虎離山"], a: 0, exp: "擒賊擒王：解決問題必須抓住主要矛盾或打擊核心樞紐。" },
+            { q: "為了查出內鬼，經理故意在會議上走漏一項假機密，這招_______果然讓間諜露出了馬腳。", options: ["打草驚蛇", "拋磚引玉", "欲擒故縱", "借屍還魂"], a: 0, exp: "打草驚蛇：散佈假機密來觀察反應。" },
+            { q: "這個沒落的貴族試圖_______，藉由參與慈善晚會來重塑自己昔日的社會影響力。", options: ["調虎離山", "借屍還魂", "擒賊擒王", "拋磚引玉"], a: 1, exp: "借屍還魂：利用沒落的名號重新包裝。" },
+            { q: "為了攻克敵軍的堅固要塞，將軍派人去襲擊他們後方的補給站，試圖_______。", options: ["欲擒故縱", "打草驚蛇", "調虎離山", "擒賊擒王"], a: 2, exp: "調虎離山：逼迫敵軍離開要塞。" },
+            { q: "警方雖然掌握了嫌犯的行蹤，卻_______沒有立刻抓人，而是暗中跟蹤以揪出幕後主使。", options: ["拋磚引玉", "欲擒故縱", "借屍還魂", "打草驚蛇"], a: 1, exp: "欲擒故縱：放長線釣大魚。" },
+            { q: "他以免費贈送試用品作為_______，成功吸引了大量潛在客戶填寫問卷。", options: ["拋磚引玉", "擒賊擒王", "調虎離山", "打草驚蛇"], a: 0, exp: "拋磚引玉：用小利益引出大回報。" },
+            { q: "在激烈的選戰中，與其攻擊對手的基層幕僚，不如_______，直接針對候選人的核心政策進行猛烈抨擊。", options: ["借屍還魂", "欲擒故縱", "擒賊擒王", "拋磚引玉"], a: 2, exp: "擒賊擒王：直擊核心要害。" },
+            { q: "在未知敵方底價的情況下，我方先提出一個試探性的報價來_______，觀察對方的反應。", options: ["打草驚蛇", "調虎離山", "借屍還魂", "擒賊擒王"], a: 0, exp: "打草驚蛇：試探敵情。" },
+            { q: "該公司利用一部多年前的經典老電影重新配音剪輯，以此_______來宣傳他們的新產品。", options: ["欲擒故纵", "借屍還魂", "拋磚引玉", "擒賊擒王"], a: 1, exp: "借屍還魂：利用舊電影的影響力。" },
+            { q: "為了讓主管離開辦公室，他故意說樓下有重要客戶來訪，這招_______讓他有機會偷偷查看桌上的文件。", options: ["調虎離山", "拋磚引玉", "打草驚蛇", "借屍還魂"], a: 0, exp: "調虎離山：騙走主管以達成目的。" }
         ],
         "混戰計": [
-            { q: "要解決日益嚴重的通貨膨脹，政府不能只靠價格補貼，必須________，從根本上調控市場上的貨幣供給量。", a: "釜底抽薪", exp: "釜底抽薪：從根本上解決問題，摧毀敵人的力量泉源。" },
-            { q: "在股市大跌、投資人恐慌拋售之際，部分機構法人卻趁機________，低價收購了許多優質企業的股票。", a: "混水摸魚", exp: "混水摸魚：趁著混亂的時機從中撈取利益。" },
-            { q: "該名經濟犯利用假護照與替身在機場製造出境的假象，自己則________，偷偷搭乘走私船潛逃海外。", a: "金蟬脫殼", exp: "金蟬脫殼：製造假象迷惑敵人，掩護自己秘密轉移。" },
-            { q: "警方將整棟大樓的出入口全面封鎖，佈下天羅地網，準備________，不讓任何一名嫌犯漏網。", a: "關門捉賊", exp: "關門捉賊：切斷弱小敵人的退路，將其徹底消滅。" },
-            { q: "這家跨國企業採取________的戰略，先與歐洲的技術巨頭結盟，隨後集中火力併購亞洲鄰近地區的競爭對手。", a: "遠交近攻", exp: "遠交近攻：結交距離遙遠的對手，先攻打與自己鄰近的對象。" },
-            { q: "經理以「跨部門資源整合」為名借調了我們的核心工程師，結果專案完成後卻________，直接將他們編入自己的麾下。", a: "假道伐虢", exp: "假道伐虢：以借路/借用為名，實際上是要併吞提供便利的一方。" }
+            { q: "要解決日益嚴重的通貨膨脹，政府不能只靠價格補貼，必須_______，從根本上調控市場上的貨幣供給量。", options: ["釜底抽薪", "混水摸魚", "金蟬脫殼", "遠交近攻"], a: 0, exp: "釜底抽薪：從根本上解決問題，摧毀敵人的力量泉源。" },
+            { q: "在股市大跌、投資人恐慌拋售之際，部分機構法人卻趁機_______，低價收購了許多優質企業的股票。", options: ["關門捉賊", "假道伐虢", "混水摸魚", "釜底抽薪"], a: 2, exp: "混水摸魚：趁著混亂的時機從中撈取利益。" },
+            { q: "該名經濟犯利用假護照與替身在機場製造出境的假象，自己則_______，偷偷搭乘走私船潛逃海外。", options: ["金蟬脫殼", "遠交近攻", "關門捉賊", "混水摸魚"], a: 0, exp: "金蟬脫殼：製造假象迷惑敵人，掩護自己秘密轉移。" },
+            { q: "警方將整棟大樓的出入口全面封鎖，佈下天羅地網，準備_______，不讓任何一名嫌犯漏網。", options: ["假道伐虢", "關門捉賊", "釜底抽薪", "金蟬脫殼"], a: 1, exp: "關門捉賊：切斷弱小敵人的退路，將其徹底消滅。" },
+            { q: "這家跨國企業採取_______的戰略，先與歐洲的技術巨頭結盟，隨後集中火力併購亞洲鄰近地區的競爭對手。", options: ["遠交近攻", "混水摸魚", "假道伐虢", "關門捉賊"], a: 0, exp: "遠交近攻：結交距離遙遠的對手，先攻打與自己鄰近的對象。" },
+            { q: "經理以「跨部門資源整合」為名借調了我們的核心工程師，結果專案完成後卻_______，直接將他們編入自己的麾下。", options: ["釜底抽薪", "金蟬脫殼", "遠交近攻", "假道伐虢"], a: 3, exp: "假道伐虢：以借路/借用為名，實際上是要併吞提供便利的一方。" },
+            { q: "與其不斷撲滅森林邊緣的小火，不如_______，直接出動直升機噴灑阻燃劑切斷火源。", options: ["混水摸魚", "釜底抽薪", "關門捉賊", "假道伐虢"], a: 1, exp: "釜底抽薪：從源頭切斷問題。" },
+            { q: "兩家大廠為了專利權對簿公堂，幾家小代工廠卻_______，趁機搶下了不少訂單。", options: ["金蟬脫殼", "遠交近攻", "混水摸魚", "釜底抽薪"], a: 2, exp: "混水摸魚：趁對手混戰時獲利。" },
+            { q: "大軍撤退時，將軍命人將戰鼓綁在羊身上，羊一動就擊鼓，主力卻早已_______。", options: ["關門捉賊", "假道伐虢", "金蟬脫殼", "混水摸魚"], a: 2, exp: "金蟬脫殼：懸羊擊鼓是標準的金蟬脫殼之計。" },
+            { q: "面對這股流竄的盜匪，我們不能一路追擊，必須將他們趕入峽谷後_______，才能徹底剿滅。", options: ["遠交近攻", "關門捉賊", "釜底抽薪", "金蟬脫殼"], a: 1, exp: "關門捉賊：切斷退路再消滅。" },
+            { q: "國家在擴張領土時，應當遵循_______的原則，切忌勞師動眾去攻打遙遠的國度而腹背受敵。", options: ["假道伐虢", "混水摸魚", "遠交近攻", "關門捉賊"], a: 2, exp: "遠交近攻：穩紮穩打的擴張策略。" },
+            { q: "歷史上晉獻公以寶馬和美玉向虞國借路攻打虢國，得勝回朝時便_______，順手把虞國也滅了。", options: ["釜底抽薪", "金蟬脫殼", "假道伐虢", "遠交近攻"], a: 2, exp: "假道伐虢：借路為名，吞併為實。" },
+            { q: "為了讓對手的生產線停擺，我們_______，直接高價包下了市場上所有的關鍵原物料。", options: ["釜底抽薪", "關門捉賊", "混水摸魚", "金蟬脫殼"], a: 0, exp: "釜底抽薪：斷絕對方的資源。" },
+            { q: "駭客利用公司伺服器當機、IT部門手忙腳亂之際_______，成功盜走了客戶數據庫。", options: ["遠交近攻", "混水摸魚", "假道伐虢", "釜底抽薪"], a: 1, exp: "混水摸魚：趁混亂時盜取資料。" },
+            { q: "嫌犯在房間裡留下播放著對話聲的錄音機，本人卻_______從通風管逃之夭夭。", options: ["金蟬脫殼", "關門捉賊", "假道伐虢", "遠交近攻"], a: 0, exp: "金蟬脫殼：用錄音機當作「空殼」掩護。" }
         ],
         "並戰計": [
-            { q: "不良建商在施工過程中________，將原本合約規定使用的高級抗震鋼筋，全數替換成劣質的便宜貨。", a: "偷梁換柱", exp: "偷梁換柱：暗中玩弄手法，以劣代優、抽換核心。" },
-            { q: "總經理在晨會上嚴厲譴責遲到的實習生，實則是________，有意警告那些近期工作態度散漫的資深主管。", a: "指桑罵槐", exp: "指桑罵槐：表面上罵這個人，實際上是在警告另一個人。" },
-            { q: "面對檢察官的尖銳盤問，這位政界大老________，屢屢以「年代久遠、記不清楚」為由，成功迴避了核心問題。", a: "假癡不癲", exp: "假癡不癲：裝傻充愣，隱藏實力讓敵人失去戒心。" },
-            { q: "詐騙集團先以高額獲利誘騙受害者投入初期資金，待其投入全數身家後便________，關閉投資平台並捲款潛逃。", a: "上屋抽梯", exp: "上屋抽梯：給予利益引誘敵人深入後，切斷其退路。" },
-            { q: "該新創公司雖資本額不高，卻砸重金租下信義區的頂級商辦並廣發新聞稿，藉此________，營造出規模宏大的假象以吸引創投。", a: "樹上開花", exp: "樹上開花：力量薄弱卻借用外力或製造假象來壯大聲勢。" },
-            { q: "這家小公司在被併購初期表現得十分低調，但隨後憑藉掌握關鍵技術而________，其團隊最終接管了母公司的核心決策權。", a: "反客為主", exp: "反客為主：由被動轉為主動，伺機篡奪領導權。" }
+            { q: "不良建商在施工過程中_______，將原本合約規定使用的高級抗震鋼筋，全數替換成劣質的便宜貨。", options: ["偷梁換柱", "指桑罵槐", "假癡不癲", "上屋抽梯"], a: 0, exp: "偷梁換柱：暗中玩弄手法，以劣代優、抽換核心。" },
+            { q: "總經理在晨會上嚴厲譴責遲到的實習生，實則是_______，有意警告那些近期工作態度散漫的資深主管。", options: ["假癡不癲", "指桑罵槐", "樹上開花", "反客為主"], a: 1, exp: "指桑罵槐：表面上罵這個人，實際上是在警告另一個人。" },
+            { q: "面對檢察官的尖銳盤問，這位政界大老_______，屢屢以「年代久遠、記不清楚」為由，成功迴避了核心問題。", options: ["上屋抽梯", "偷梁換柱", "假癡不癲", "反客為主"], a: 2, exp: "假癡不癲：裝傻充愣，隱藏實力讓敵人失去戒心。" },
+            { q: "詐騙集團先以高額獲利誘騙受害者投入初期資金，待其投入全數身家後便_______，關閉投資平台並捲款潛逃。", options: ["樹上開花", "反客為主", "指桑罵槐", "上屋抽梯"], a: 3, exp: "上屋抽梯：給予利益引誘敵人深入後，切斷其退路。" },
+            { q: "該新創公司雖資本額不高，卻砸重金租下信義區的頂級商辦並廣發新聞稿，藉此_______，營造出規模宏大的假象以吸引創投。", options: ["樹上開花", "偷梁換柱", "假癡不癲", "指桑罵槐"], a: 0, exp: "樹上開花：力量薄弱卻借用外力或製造假象來壯大聲勢。" },
+            { q: "這家小公司在被併購初期表現得十分低調，但隨後憑藉掌握關鍵技術而_______，其團隊最終接管了母公司的核心決策權。", options: ["反客為主", "上屋抽梯", "偷梁換柱", "假癡不癲"], a: 0, exp: "反客為主：由被動轉為主動，伺機篡奪領導權。" },
+            { q: "合資企業中，大股東悄悄地將原本的管理團隊_______，全部換成自己的人馬，成功掌握了實權。", options: ["指桑罵槐", "偷梁換柱", "樹上開花", "上屋抽梯"], a: 1, exp: "偷梁換柱：抽換核心人員。" },
+            { q: "主帥為了整頓軍紀，故意重罰了一名犯小錯的士兵，這招_______成功震懾了那些驕傲的將領。", options: ["假癡不癲", "反客為主", "指桑罵槐", "樹上開花"], a: 2, exp: "指桑罵槐：敲山震虎的手段。" },
+            { q: "在局勢未明之前，老謀深算的他選擇_______，成天在家種花養鳥，不理政事，讓政敵對他放下了戒心。", options: ["偷梁換柱", "假癡不癲", "上屋抽梯", "反客為主"], a: 1, exp: "假癡不癲：隱藏鋒芒。" },
+            { q: "超市先發送極具吸引力的折價券引誘顧客進店，等顧客挑滿整車商品結帳時才告知折價券已過期，這簡直是_______。", options: ["上屋抽梯", "樹上開花", "指桑罵槐", "偷梁換柱"], a: 0, exp: "上屋抽梯：引誘進來後切斷退路（雖然此例較為生活化，但邏輯相符）。" },
+            { q: "他在履歷上將參與過的微小專案誇大為自己主導的國際級大案，企圖_______以獲得高薪職位。", options: ["反客為主", "假癡不癲", "樹上開花", "指桑罵槐"], a: 2, exp: "樹上開花：誇大自身實力。" },
+            { q: "外商公司最初只是入股提供技術支援，幾年後卻_______，收購了過半股份並全面接管了經營權。", options: ["反客為主", "偷梁換柱", "上屋抽梯", "樹上開花"], a: 0, exp: "反客為主：從支援的客位變為掌權的主位。" },
+            { q: "美術經銷商在畫作運送過程中_______，將真跡掉包成了高仿的贗品。", options: ["假癡不癲", "偷梁換柱", "指桑罵槐", "反客為主"], a: 1, exp: "偷梁換柱：以假代真。" },
+            { q: "長官對著空氣大罵某個部門的績效極差，在場的所有人都心知肚明，這不過是_______罷了。", options: ["上屋抽梯", "樹上開花", "指桑罵槐", "假癡不癲"], a: 2, exp: "指桑罵槐：拐彎抹角的責罵。" },
+            { q: "我軍在山谷中灑滿金銀珠寶誘敵深入，等敵軍全都進來搶奪時，立刻炸毀谷口，這招_______全殲了敵軍。", options: ["反客為主", "偷梁換柱", "上屋抽梯", "樹上開花"], a: 2, exp: "上屋抽梯：利誘深入後斷其退路。" }
         ],
         "敗戰計": [
-            { q: "商業間諜利用自身魅力與豐厚的回扣，對該公司的採購部經理施以________，成功獲取了極機密的底標價格。", a: "美人計", exp: "美人計：利用美色或利益誘惑敵人，使其喪失鬥志。" },
-            { q: "儘管公司資金鏈已經斷裂，董事長對外仍大肆宣揚即將擴廠的計畫，試圖大唱________，使競爭對手不敢輕舉妄動。", a: "空城計", exp: "空城計：兵力空虛時故意虛張聲勢，利用敵人的多疑使其不敢進攻。" },
-            { q: "將軍故意讓敵方間諜竊取一份偽造的作戰計畫，這招________成功讓敵軍主帥誤判情勢，將主力部隊調往錯誤的方向。", a: "反間計", exp: "反間計：識破敵方間諜並利用其傳遞假情報，或在敵軍內部製造猜忌。" },
-            { q: "為了打入走私集團的核心，臥底警員不惜自毀名譽，上演一齣被警局開除的________，終於獲取了黑幫老大的信任。", a: "苦肉計", exp: "苦肉計：故意傷害自己以騙取敵人的信任。" },
-            { q: "對手先散佈不利謠言打擊我們股價，接著惡意收購散戶籌碼，最後發起董事會改選，這一套________讓我們措手不及。", a: "連環計", exp: "連環計：將多個計謀環環相扣，讓敵人陷入連鎖困境。" },
-            { q: "眼見市場趨勢已經不可逆轉地朝向數位化發展，這家傳統底片大廠決定________，全面退出舊有市場，轉型發展醫療影像。", a: "走為上計", exp: "走為上計：實力懸殊或毫無勝算時，果斷撤退以保存實力。" }
+            { q: "商業間諜利用自身魅力與豐厚的回扣，對該公司的採購部經理施以_______，成功獲取了極機密的底標價格。", options: ["空城計", "美人計", "反間計", "苦肉計"], a: 1, exp: "美人計：利用美色或利益誘惑敵人，使其喪失鬥志。" },
+            { q: "儘管公司資金鏈已經斷裂，董事長對外仍大肆宣揚即將擴廠的計畫，試圖大唱_______，使競爭對手不敢輕舉妄動。", options: ["美人計", "連環計", "空城計", "走為上計"], a: 2, exp: "空城計：兵力空虛時故意虛張聲勢，利用敵人的多疑使其不敢進攻。" },
+            { q: "將軍故意讓敵方間諜竊取一份偽造的作戰計畫，這招_______成功讓敵軍主帥誤判情勢，將主力部隊調往錯誤的方向。", options: ["反間計", "苦肉計", "走為上計", "美人計"], a: 0, exp: "反間計：識破敵方間諜並利用其傳遞假情報，或製造猜忌。" },
+            { q: "為了打入走私集團的核心，臥底警員不惜自毀名譽，上演一齣被警局開除的_______，終於獲取了黑幫老大的信任。", options: ["空城計", "反間計", "苦肉計", "連環計"], a: 2, exp: "苦肉計：故意傷害自己以騙取敵人的信任。" },
+            { q: "對手先散佈不利謠言打擊我們股價，接著惡意收購散戶籌碼，最後發起董事會改選，這一套_______讓我們措手不及。", options: ["走為上計", "連環計", "美人計", "空城計"], a: 1, exp: "連環計：將多個計謀環環相扣，讓敵人陷入連鎖困境。" },
+            { q: "眼見市場趨勢已經不可逆轉地朝向數位化發展，這家傳統底片大廠決定_______，全面退出舊有市場，轉型發展醫療影像。", options: ["苦肉計", "反間計", "連環計", "走為上計"], a: 3, exp: "走為上計：實力懸殊或毫無勝算時，果斷撤退以保存實力。" },
+            { q: "古代越王勾踐送西施給吳王夫差，使其荒廢國政，這是歷史上著名的_______。", options: ["美人計", "空城計", "苦肉計", "連環計"], a: 0, exp: "美人計：利用美色腐化敵方首領。" },
+            { q: "我軍主力已經撤出城外，守將卻大開城門在城樓上撫琴，敵軍主帥生性多疑，以為有埋伏便撤退了，這正是_______的妙用。", options: ["反間計", "走為上計", "空城計", "美人計"], a: 2, exp: "空城計：利用多疑的心理掩飾空虛。" },
+            { q: "我方故意在網路上流出一份假郵件，讓對手公司的兩位執行副總互相猜忌，這招_______成功瓦解了他們的合作。", options: ["苦肉計", "反間計", "連環計", "走為上計"], a: 1, exp: "反間計：在敵方內部製造矛盾與猜忌。" },
+            { q: "黃蓋在陣前公然頂撞周瑜，被施以重刑打得皮開肉綻，這齣_______成功騙過了曹操的眼睛。", options: ["空城計", "美人計", "走為上計", "苦肉計"], a: 3, exp: "苦肉計：以自殘來換取敵方信任。" },
+            { q: "龐統獻計讓曹操將戰船用鐵鍊鎖在一起，方便日後周瑜火攻，這正是赤壁之戰中關鍵的_______。", options: ["反間計", "連環計", "苦肉計", "空城計"], a: 1, exp: "連環計：計計相扣，讓敵人無法脫身。" },
+            { q: "面對擁有壓倒性優勢的敵軍，我方指揮官深知硬拚必死無疑，於是下令_______，撤入深山保留火種。", options: ["走為上計", "美人計", "反間計", "連環計"], a: 0, exp: "走為上計：暫時撤退，保存實力。" },
+            { q: "敵軍將領剛直不阿，用_______對他根本無效，反而會暴露我方的意圖。", options: ["美人計", "空城計", "苦肉計", "走為上計"], a: 0, exp: "美人計：對品行端正者無效。" },
+            { q: "對手先用高薪挖走我們的業務經理，再利用他帶走的客戶資料對我們進行低價搶單，這種_______真是陰險。", options: ["走為上計", "連環計", "反間計", "空城計"], a: 1, exp: "連環計：挖角與搶單環環相扣。" },
+            { q: "與其在這場毫無勝算的官司中繼續耗費鉅額律師費，不如_______，庭外和解以減少損失。", options: ["苦肉計", "反間計", "連環計", "走為上計"], a: 3, exp: "走為上計：及時停損也是一種撤退策略。" }
         ]
     };
+
+    // --- 洗牌函數 (隨機打亂陣列) ---
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
 
     const SET_STRATAGEMS = {
         "勝戰計": ["瞞天過海", "圍魏救趙", "借刀殺人", "以逸待勞", "趁火打劫", "聲東擊西"],
@@ -993,15 +1063,15 @@
     // --- 遊戲狀態與計分核心 ---
     const passages = {};
     let gameState = {
-        visited: [], // 記錄點擊過的頁面
-        answered: {}, // 記錄已作答過的計謀 (passageName -> true)
-        quizPassed: {} // 記錄已通過的測驗 (setName -> true)
+        visited: [], 
+        answered: {}, 
+        quizPassed: {} 
     };
     
     let isAudioPlaying = false;
     let currentPlayer = "";
     let currentScore = 0;
-    let comboCount = 0; // 連擊數
+    let comboCount = 0; 
 
     // 1. 遊戲開始
     function startGame() {
@@ -1050,7 +1120,6 @@
     function parseContent(text, currentPassageName) {
         let html = text;
         
-        // 處理跳轉按鈕 (加上 visited-link 邏輯)
         html = html.replace(/\[\[(.*?)->(.*?)\]\]/g, function(match, label, target) {
             let extraClass = gameState.visited.includes(target) ? ' visited-link' : '';
             return `<div class="nav-wrapper"><a href="javascript:void(0)" class="nav-link${extraClass}" onclick="goTo('${target}')">▶ ${label}</a></div>`;
@@ -1060,20 +1129,17 @@
             return `<div class="nav-wrapper"><a href="javascript:void(0)" class="nav-link${extraClass}" onclick="goTo('${target}')">▶ ${target}</a></div>`;
         });
         
-        // 選項按鈕與計分判斷
         const linkRegex = /\(link:\s*"([^"]+)"\)\[\s*\(text-color:\s*(#[0-9a-fA-F]+)\)\[([\s\S]*?)\]\s*\]/g;
         
         if (gameState.answered[currentPassageName]) {
-            // 如果此題已經回答過，隱藏按鈕，只顯示正確的回饋當作複習
             html = html.replace(linkRegex, function(match, btnText, color, innerText) {
-                if (color.toLowerCase() === '#d4af37') { // 只擷取金色(正確)的回饋
+                if (color.toLowerCase() === '#d4af37') { 
                      return `<div class="feedback-box" style="display:block; margin-top: 20px; border-left: 5px solid ${color}; color: ${color};">💡 兵法重點複習：<br>${innerText.trim()}</div>`;
                 }
                 return ""; 
             });
             html += `<div style="margin-top:20px; padding:10px; background:#e8e8e8; border-radius:8px; color:#555; text-align:center; font-weight:bold;">✅ 此計謀已演練完畢，得分已入帳。</div>`;
         } else {
-            // 還沒回答過，正常渲染選擇按鈕
             html = html.replace(linkRegex, function(match, btnText, color, innerText) {
                 let isCorrect = (color.toLowerCase() === '#d4af37');
                 return `<div style="margin-top: 10px;">
@@ -1083,7 +1149,6 @@
             });
         }
 
-        // 圖片替換
         html = html.replace(/<img src="file:\/\/\/.*?\/([^/]+?)(?:\.[a-zA-Z]+)"[^>]*>/g, function(match, encodedName) {
             let key = decodeURIComponent(encodedName);
             if(key.includes("Gemini_Generated")) {
@@ -1108,16 +1173,14 @@
         if(passages[passageName]) {
             container.innerHTML = parseContent(passages[passageName], passageName);
             
-            // 檢查是否符合【測驗觸發條件】
             if (SET_STRATAGEMS[passageName]) {
                 let allVisited = SET_STRATAGEMS[passageName].every(p => gameState.visited.includes(p));
                 if (allVisited && !gameState.quizPassed[passageName]) {
-                    container.innerHTML += `<div style="margin-top:40px; text-align:center;"><button class="btn" style="width:80%; background-color:#d4af37; color:#222; font-size:1.2em;" onclick="startQuiz('${passageName}')">📝 進行本套兵法總結測驗 (C1-C2等級)</button></div>`;
+                    container.innerHTML += `<div style="margin-top:40px; text-align:center;"><button class="btn" style="width:80%; background-color:#d4af37; color:#222; font-size:1.2em;" onclick="startQuiz('${passageName}')">📝 進行本套兵法總結測驗 (15抽5)</button></div>`;
                 } else if (allVisited && gameState.quizPassed[passageName]) {
-                    container.innerHTML += `<div style="margin-top:30px; text-align:center; color:#8b0000; font-weight:bold; font-size:1.2em; background:#fdf5e6; padding:10px; border-radius:8px;">🏆 您已成功通過【${passageName}】高階綜合演練！</div>`;
+                    container.innerHTML += `<div style="margin-top:30px; text-align:center; color:#8b0000; font-weight:bold; font-size:1.2em; background:#fdf5e6; padding:10px; border-radius:8px;">🏆 您已成功通過【${passageName}】高階綜合演練！<br><button class="btn btn-secondary" style="margin-top:10px;" onclick="startQuiz('${passageName}')">再次挑戰 (不重複計分)</button></div>`;
                 }
             }
-            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             container.innerHTML = "<h2 style='color:#8b0000;'>兵法卷宗遺失 (找不到段落)</h2>";
@@ -1133,8 +1196,8 @@
         });
 
         btn.style.display = 'none';
-        btn.nextElementSibling.style.display = 'block'; // 顯示引導回饋
-        gameState.answered[passageName] = true; // 標記為已答過
+        btn.nextElementSibling.style.display = 'block'; 
+        gameState.answered[passageName] = true; 
         
         if (isCorrect) {
             comboCount++;
@@ -1145,7 +1208,7 @@
             let comboUI = document.getElementById('hud-combo');
             comboUI.innerText = comboCount > 1 ? `🔥 ${comboCount} 連擊！(+${earnedScore})` : `✅ 答對 (+100)`;
             comboUI.style.animation = 'none';
-            comboUI.offsetHeight; /* trigger reflow */
+            comboUI.offsetHeight; 
             comboUI.style.animation = 'pop 0.3s ease-out';
             
             saveScore();
@@ -1158,15 +1221,20 @@
         }
     };
 
-    // --- 測驗系統 (高階填空) ---
+    // --- 測驗系統 (15抽5 選擇題版) ---
     let currentQuizQuestions = [];
     let currentQIndex = 0;
     let attemptsLeft = 3;
     let currentQuizSetName = "";
+    let isReplay = false;
 
     window.startQuiz = function(setName) {
         currentQuizSetName = setName;
-        currentQuizQuestions = QUIZ_DATA[setName];
+        isReplay = gameState.quizPassed[setName] || false; 
+        
+        // 15題中隨機抽取5題
+        let allQ = [...QUIZ_DATA[setName]];
+        currentQuizQuestions = shuffle(allQ).slice(0, 5);
         currentQIndex = 0;
         
         document.getElementById('overlay').style.display = 'block';
@@ -1176,12 +1244,12 @@
 
     function loadQuizQuestion() {
         if(currentQIndex >= currentQuizQuestions.length) {
-            // 測驗結束
             document.getElementById('quiz-question').innerHTML = "🎉 恭喜完成本套兵法綜合測驗！";
-            document.getElementById('quiz-input').style.display = 'none';
+            document.getElementById('quiz-options-container').innerHTML = "";
             document.getElementById('quiz-feedback').innerHTML = "";
             document.getElementById('quiz-progress').innerText = "";
-            let btn = document.getElementById('quiz-btn');
+            let btn = document.getElementById('quiz-next-btn');
+            btn.style.display = 'block';
             btn.innerText = "關閉並返回";
             btn.onclick = closeQuizAndComplete;
             return;
@@ -1190,69 +1258,91 @@
         attemptsLeft = 3;
         let q = currentQuizQuestions[currentQIndex];
         document.getElementById('quiz-title').innerText = `【綜合演練】${currentQuizSetName}`;
-        document.getElementById('quiz-progress').innerText = `第 ${currentQIndex + 1} / 6 題 (剩餘機會: ${attemptsLeft} 次)`;
+        document.getElementById('quiz-progress').innerText = `第 ${currentQIndex + 1} / 5 題 (剩餘機會: ${attemptsLeft} 次)`;
         document.getElementById('quiz-question').innerText = q.q;
         
-        let inputField = document.getElementById('quiz-input');
-        inputField.value = "";
-        inputField.style.display = 'inline-block';
-        inputField.disabled = false;
-        setTimeout(() => inputField.focus(), 100);
-        
+        // 生成選項按鈕
+        let optionsHtml = "";
+        let labels = ["A", "B", "C", "D"];
+        q.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="quiz-option-btn" id="opt-btn-${idx}" onclick="checkQuizAnswer(${idx})">${labels[idx]}. ${opt}</button>`;
+        });
+        document.getElementById('quiz-options-container').innerHTML = optionsHtml;
         document.getElementById('quiz-feedback').innerText = "";
-        
-        let btn = document.getElementById('quiz-btn');
-        btn.innerText = "送出答案";
-        btn.onclick = checkQuizAnswer;
+        document.getElementById('quiz-next-btn').style.display = 'none';
     }
 
-    window.checkQuizAnswer = function() {
-        let inputField = document.getElementById('quiz-input');
-        let input = inputField.value.trim();
-        if(!input) return;
-        
+    window.checkQuizAnswer = function(selectedIndex) {
         let q = currentQuizQuestions[currentQIndex];
         let feedback = document.getElementById('quiz-feedback');
-        let btn = document.getElementById('quiz-btn');
+        let nextBtn = document.getElementById('quiz-next-btn');
+        let selectedBtn = document.getElementById(`opt-btn-${selectedIndex}`);
         
-        if(input === q.a) {
-            // 測驗答對也算連擊
-            comboCount++;
-            let earnedScore = comboCount * 100;
-            currentScore += earnedScore;
-            document.getElementById('hud-score').innerText = currentScore;
-            saveScore();
+        // 答對了
+        if(selectedIndex === q.a) {
+            // 標示正確按鈕
+            selectedBtn.classList.add('correct');
+            disableAllOptions();
             
-            feedback.style.color = "green";
-            feedback.innerHTML = `✅ 答對了！(+${earnedScore}分)<br><span style="font-size:0.85em;color:#555;font-weight:normal;">${q.exp}</span>`;
-            inputField.disabled = true;
-            btn.innerText = "下一題";
-            btn.onclick = () => { currentQIndex++; loadQuizQuestion(); };
+            // 非重複挑戰才計分
+            if(!isReplay) {
+                comboCount++;
+                let earnedScore = comboCount * 100;
+                currentScore += earnedScore;
+                document.getElementById('hud-score').innerText = currentScore;
+                saveScore();
+                feedback.innerHTML = `<span style="color:green;">✅ 答對了！(+${earnedScore}分)</span><br><span style="font-size:0.9em;color:#555;">${q.exp}</span>`;
+            } else {
+                feedback.innerHTML = `<span style="color:green;">✅ 答對了！(重複挑戰不計分)</span><br><span style="font-size:0.9em;color:#555;">${q.exp}</span>`;
+            }
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "下一題";
+            nextBtn.onclick = () => { currentQIndex++; loadQuizQuestion(); };
+            
         } else {
+            // 答錯了
             attemptsLeft--;
-            comboCount = 0; // 答錯中斷連擊
+            selectedBtn.classList.add('wrong');
+            selectedBtn.disabled = true; // 該錯誤選項不可再點
+            if(!isReplay) comboCount = 0; 
             
             if(attemptsLeft > 0) {
                 feedback.style.color = "red";
                 feedback.innerText = `❌ 答錯了。剩餘機會：${attemptsLeft} 次`;
-                document.getElementById('quiz-progress').innerText = `第 ${currentQIndex + 1} / 6 題 (剩餘機會: ${attemptsLeft} 次)`;
-                inputField.value = "";
-                inputField.focus();
+                document.getElementById('quiz-progress').innerText = `第 ${currentQIndex + 1} / 5 題 (剩餘機會: ${attemptsLeft} 次)`;
             } else {
-                feedback.style.color = "#8b0000";
-                feedback.innerHTML = `❌ 3次機會用盡。正確答案是：【${q.a}】。<br><span style="font-size:0.85em;color:#555;font-weight:normal;">${q.exp}</span>`;
-                inputField.disabled = true;
-                btn.innerText = "下一題";
-                btn.onclick = () => { currentQIndex++; loadQuizQuestion(); };
+                // 3次全錯
+                disableAllOptions();
+                document.getElementById(`opt-btn-${q.a}`).classList.add('correct'); // 顯示正確答案
+                feedback.innerHTML = `<span style="color:#8b0000;">❌ 3次機會用盡。正確答案是：【${q.options[q.a]}】。</span><br><span style="font-size:0.9em;color:#555;">${q.exp}</span>`;
+                nextBtn.style.display = 'block';
+                nextBtn.innerText = "下一題";
+                nextBtn.onclick = () => { currentQIndex++; loadQuizQuestion(); };
             }
         }
     };
+    
+    function disableAllOptions() {
+        let btns = document.querySelectorAll('.quiz-option-btn');
+        btns.forEach(b => {
+            b.disabled = true;
+            b.style.cursor = 'not-allowed';
+        });
+    }
+
+    window.cancelQuiz = function() {
+        if(confirm("確定要離開測驗嗎？(目前的測驗進度將不會保留)")) {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('quiz-modal').style.display = 'none';
+        }
+    }
 
     function closeQuizAndComplete() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('quiz-modal').style.display = 'none';
         gameState.quizPassed[currentQuizSetName] = true;
-        goTo(currentQuizSetName); // 重新渲染該頁面以顯示通過訊息
+        goTo(currentQuizSetName); 
     }
 
     // 5. 排行榜系統 (LocalStorage)
@@ -1284,7 +1374,6 @@
 
     window.closeModals = function() {
         document.getElementById('leaderboard-modal').style.display = 'none';
-        // 如果測驗正在進行中，不允許點擊背景關閉
         if(document.getElementById('quiz-modal').style.display === 'block') return;
         document.getElementById('overlay').style.display = 'none';
     }
